@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { UserService } from '../user.service';
-
+import { environment } from './../../environments/environment';
 @Component({
     selector: 'app-admin',
     templateUrl: './admin.component.html',

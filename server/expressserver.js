@@ -1,8 +1,10 @@
 const express = require("express");
-
+const cors = require("cors");
 const app = express();
+app.use(cors());
 app.use(express.json());
 const mysql = require("mysql");
+/*
 const connection = mysql.createConnection({
   host: "localhost",
   port: "3306",
@@ -10,11 +12,19 @@ const connection = mysql.createConnection({
   password: "root",
   database: "spaceshop"
 });
+*/
+const connection = mysql.createConnection({
+  host: "localhost",
+  port: "3308",
+  user: "user",
+  password: "pass",
+  database: "spaceshop"
+});
 const Cryptr = require("cryptr");
 const cryptr = new Cryptr("secretSpaceships");
 
 app.get("/", (req, res) => {
-  connection.query("SELECT * from customers", function(err, rows, fields) {
+  connection.query("SELECT * from customers", function (err, rows, fields) {
     if (err) {
       res.sendStatus(500);
       throw err;
@@ -25,11 +35,16 @@ app.get("/", (req, res) => {
 });
 
 app.post("/api/register/", (req, res) => {
-  const { nickname, species_id, planets_id, password } = req.body;
+  const {
+    nickname,
+    species_id,
+    planets_id,
+    password
+  } = req.body;
   const cryptedPass = cryptr.encrypt(password);
   connection.query(
     `insert into customers (Nickname, Species_Id, Planets_Id, Password) values ('${nickname}', '${species_id}', '${planets_id}','${cryptedPass}')`,
-    function(err, rows, fields) {
+    function (err, rows, fields) {
       if (err) {
         res.sendStatus(500);
         throw err;
@@ -40,10 +55,14 @@ app.post("/api/register/", (req, res) => {
 });
 
 app.post("/api/auth/", (req, res) => {
-  const { nickname, password } = req.body;
+  const {
+    nickname,
+    password
+  } = req.body;
+  console.log("nickname => " + nickname);
   connection.query(
-    `SELECT * from customers where nickname = '${nickname}'`,
-    function(err, rows, fields) {
+    `SELECT * from customers where Nickname = '${nickname}'`,
+    function (err, rows, fields) {
       if (err) {
         res.sendStatus(500);
         throw err;
@@ -52,7 +71,7 @@ app.post("/api/auth/", (req, res) => {
       if (cryptr.decrypt(rows[0].Password) == password) {
         connection.query(
           `SELECT * from sessions where customer_id = '${rows[0].Id}'`,
-          function(sessionErr, sessionRows, sessionFields) {
+          function (sessionErr, sessionRows, sessionFields) {
             if (sessionErr) {
               res.sendStatus(500);
               throw sessionErr;
@@ -60,14 +79,14 @@ app.post("/api/auth/", (req, res) => {
             if (sessionRows.length == 0) {
               const currentDate = new Date();
               const nextWeekDate = new Date(
-                currentDate.setDate(currentDate.getDate() + 7)
-              )
+                  currentDate.setDate(currentDate.getDate() + 7)
+                )
                 .toISOString()
                 .slice(0, 19)
                 .replace("T", " ");
               connection.query(
                 `INSERT into sessions (Customer_Id, Species_Id, Datestamp) values ('${rows[0].Id}', '${rows[0].Species_Id}', '${nextWeekDate}')`,
-                function(
+                function (
                   insertSessionErr,
                   insertSessionRows,
                   insertSessionFields
@@ -84,7 +103,10 @@ app.post("/api/auth/", (req, res) => {
       } else {
         res
           .status(401)
-          .send({ success: "false", message: "Invalid credentials" });
+          .send({
+            success: "false",
+            message: "Invalid credentials"
+          });
       }
     }
   );
@@ -93,11 +115,13 @@ app.post("/api/auth/", (req, res) => {
 app.get("/api/isLoggedIn/", (req, res) => {
   connection.query(
     `select * from sessions where Customer_Id = '${req.query.customer_id}'`,
-    function(err, rows, fields) {
+    function (err, rows, fields) {
       if (err) {
         res
           .status(404)
-          .send({ status: "false" })
+          .send({
+            status: "false"
+          })
           .json();
         throw err;
       }
@@ -105,18 +129,22 @@ app.get("/api/isLoggedIn/", (req, res) => {
         if (rows[0].Datestamp > new Date()) {
           res
             .status(200)
-            .send({ status: "true" })
+            .send({
+              status: "true"
+            })
             .json();
         } else {
           connection.query(
             `delete from sessions where Customer_Id = '${req.query.customer_id}'`,
-            function(deleteErr) {
+            function (deleteErr) {
               if (deleteErr) {
                 res.sendStatus(500);
               }
               res
                 .status(404)
-                .send({ status: "false" })
+                .send({
+                  status: "false"
+                })
                 .json();
             }
           );
@@ -124,7 +152,9 @@ app.get("/api/isLoggedIn/", (req, res) => {
       } else {
         res
           .status(404)
-          .send({ status: "false" })
+          .send({
+            status: "false"
+          })
           .json();
       }
     }
@@ -134,13 +164,15 @@ app.get("/api/isLoggedIn/", (req, res) => {
 app.post("/api/logout/", (req, res) => {
   connection.query(
     `delete from sessions where Customer_Id = '${req.body.Customer_Id}'`,
-    function(err) {
+    function (err) {
       if (err) {
         res.sendStatus(500);
       }
       res
         .status(200)
-        .send({ success: "true" })
+        .send({
+          success: "true"
+        })
         .json();
     }
   );
@@ -149,11 +181,13 @@ app.post("/api/logout/", (req, res) => {
 app.get("/api/dashboard/", (req, res) => {
   connection.query(
     `select * from sessions where Customer_Id = '${req.query.customer_id}'`,
-    function(err, rows, fields) {
+    function (err, rows, fields) {
       if (err) {
         res
           .status(404)
-          .send({ status: "false" })
+          .send({
+            status: "false"
+          })
           .json();
         throw err;
       }
@@ -162,18 +196,22 @@ app.get("/api/dashboard/", (req, res) => {
         if (rows[0].Datestamp > new Date()) {
           res
             .status(200)
-            .send({ message: `${rows[0].Species_Id}` })
+            .send({
+              message: `${rows[0].Species_Id}`
+            })
             .json();
         } else {
           connection.query(
             `delete from sessions where Customer_Id = '${req.query.customer_id}'`,
-            function(deleteErr) {
+            function (deleteErr) {
               if (deleteErr) {
                 res.sendStatus(500);
               }
               res
                 .status(404)
-                .send({ status: "false" })
+                .send({
+                  status: "false"
+                })
                 .json();
             }
           );
@@ -181,7 +219,9 @@ app.get("/api/dashboard/", (req, res) => {
       } else {
         res
           .status(404)
-          .send({ status: "false" })
+          .send({
+            status: "false"
+          })
           .json();
       }
     }

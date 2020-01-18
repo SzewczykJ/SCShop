@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http'
+import { environment } from './../environments/environment';
 
 interface Info {
     success: boolean,
@@ -21,10 +22,10 @@ export class AuthService {
         return this.loggedInStatus
     }
 
-    getUserDetails(nick, password) {
+    getUserDetails(nickname, password) {
         // post these details to API server return user info if correct
-        return this.http.post<Info>('/api/auth', {
-            nick,
+        return this.http.post<Info>(environment.apiUrl + '/api/auth', {
+            nickname,
             password
         })
     }
