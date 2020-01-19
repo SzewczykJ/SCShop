@@ -25,7 +25,7 @@ const Cryptr = require("cryptr");
 const cryptr = new Cryptr("secretSpaceships");
 
 app.get("/", (req, res) => {
-  connection.query("SELECT * from customers", function(err, rows, fields) {
+  connection.query("SELECT * from customers", function (err, rows, fields) {
     if (err) {
       res.sendStatus(500);
       throw err;
@@ -36,35 +36,53 @@ app.get("/", (req, res) => {
 });
 
 app.post("/api/register/", (req, res) => {
-  const { nickname, species_id, planets_id, password } = req.body;
+  const {
+    nickname,
+    species_id,
+    planets_id,
+    password
+  } = req.body;
   const cryptedPass = cryptr.encrypt(password);
   connection.query(
     `insert into customers (Nickname, Species_Id, Planets_Id, Password) values ('${nickname}', '${species_id}', '${planets_id}','${cryptedPass}')`,
-    function(err, rows, fields) {
+    function (err, rows, fields) {
       if (err) {
         res.sendStatus(500);
         throw err;
       }
-      res.sendStatus(200);
+      res.sendStatus(200).send({
+        Message: true
+      });
+
     }
   );
 });
 
 app.post("/api/auth/", (req, res) => {
-  const { nickname, password } = req.body;
-  console.log("nickname => " + nickname);
+  const {
+    nickname,
+    password
+  } = req.body;
+
   connection.query(
-    `SELECT c.Id, c.Nickname, c.Species_Id, c.Planets_Id, c.Password, s.Name as Species_Name from customers c join Species s on c.Species_Id = s.Id where c.Nickname = '${nickname}'`,
-    function(err, rows, fields) {
+    `SELECT c.Id, c.Nickname, c.Species_Id, c.Planets_Id, c.Password, s.Name as Species_Name from customers c join species s on c.Species_Id = s.Id where c.Nickname = '${nickname}'`,
+    function (err, rows, fields) {
       if (err) {
         res.sendStatus(500);
         throw err;
       }
-      console.log(rows[0]);
+      if (rows[0] == undefined) {
+        res.status(200).send({
+          LoggedIn: false,
+          Message: "Invalid credentials"
+        });
+        return;
+      }
+
       if (cryptr.decrypt(rows[0].Password) == password) {
         connection.query(
           `SELECT * from sessions where customer_id = '${rows[0].Id}'`,
-          function(sessionErr, sessionRows, sessionFields) {
+          function (sessionErr, sessionRows, sessionFields) {
             if (sessionErr) {
               res.sendStatus(500);
               throw sessionErr;
@@ -72,14 +90,14 @@ app.post("/api/auth/", (req, res) => {
             if (sessionRows.length == 0) {
               const currentDate = new Date();
               const nextWeekDate = new Date(
-                currentDate.setDate(currentDate.getDate() + 7)
-              )
+                  currentDate.setDate(currentDate.getDate() + 7)
+                )
                 .toISOString()
                 .slice(0, 19)
                 .replace("T", " ");
               connection.query(
                 `INSERT into sessions (Customer_Id, Species_Id, Datestamp) values ('${rows[0].Id}', '${rows[0].Species_Id}', '${nextWeekDate}')`,
-                function(
+                function (
                   insertSessionErr,
                   insertSessionRows,
                   insertSessionFields
@@ -90,7 +108,11 @@ app.post("/api/auth/", (req, res) => {
                   }
                   res
                     .status(200)
-                    .send({ LoggedIn: "true", Species: rows[0].Species_Name });
+                    .send({
+                      LoggedIn: true,
+                      Message: null,
+                      Species: rows[0].Species_Name
+                    });
                 }
               );
             } else if (
@@ -99,14 +121,19 @@ app.post("/api/auth/", (req, res) => {
             ) {
               res
                 .status(200)
-                .send({ LoggedIn: "true", Species: rows[0].Species_Name });
+                .send({
+                  LoggedIn: true,
+                  Message: null,
+                  Species: rows[0].Species_Name
+                });
             }
           }
         );
       } else {
-        res.status(401).send({
-          success: "false",
-          message: "Invalid credentials"
+        res.status(202).send({
+          LoggedIn: false,
+          Message: "Invalid credentials",
+          Species: null
         });
       }
     }
@@ -116,7 +143,7 @@ app.post("/api/auth/", (req, res) => {
 app.get("/api/isLoggedIn/", (req, res) => {
   connection.query(
     `select * from sessions where Customer_Id = '${req.query.customer_id}'`,
-    function(err, rows, fields) {
+    function (err, rows, fields) {
       if (err) {
         res
           .status(500)
@@ -137,7 +164,7 @@ app.get("/api/isLoggedIn/", (req, res) => {
         } else {
           connection.query(
             `delete from sessions where Customer_Id = '${req.query.customer_id}'`,
-            function(deleteErr) {
+            function (deleteErr) {
               if (deleteErr) {
                 res.sendStatus(500);
               }
@@ -165,7 +192,7 @@ app.get("/api/isLoggedIn/", (req, res) => {
 app.post("/api/logout/", (req, res) => {
   connection.query(
     `delete from sessions where Customer_Id = '${req.body.Customer_Id}'`,
-    function(err) {
+    function (err) {
       if (err) {
         res.sendStatus(500);
       }
@@ -182,7 +209,7 @@ app.post("/api/logout/", (req, res) => {
 app.get("/api/dashboard/", (req, res) => {
   connection.query(
     `select * from sessions where Customer_Id = '${req.query.customer_id}'`,
-    function(err, rows, fields) {
+    function (err, rows, fields) {
       if (err) {
         res
           .status(500)
@@ -204,7 +231,7 @@ app.get("/api/dashboard/", (req, res) => {
         } else {
           connection.query(
             `delete from sessions where Customer_Id = '${req.query.customer_id}'`,
-            function(deleteErr) {
+            function (deleteErr) {
               if (deleteErr) {
                 res.sendStatus(500);
               }

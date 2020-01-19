@@ -6,17 +6,25 @@ import { HomeComponent } from './home/home.component';
 import { AuthGuard } from './auth.guard';
 import { AuthService } from './auth.service';
 import { LogoutComponent } from './logout/logout.component';
+import { RegisterComponent } from './users/register/register.component';
+import { OnlyWithPermissionGuardGuard } from './only-with-permission-guard.guard';
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
 
 const routes: Routes = [
     { path: '', component: HomeComponent },
     { path: 'login', component: LoginComponent },
     { path: 'logout', component: LogoutComponent },
-    { path: 'admin', component: AdminComponent, canActivate: [AuthGuard] }
+    { path: 'register', component: RegisterComponent },
+    {
+        path: 'admin',
+        component: AdminComponent,
+        canActivate: [AuthGuard, OnlyWithPermissionGuardGuard]
+    }
 ];
 
 @NgModule({
-    imports: [RouterModule.forRoot(routes)],
+    imports: [NgbModule, RouterModule.forRoot(routes)],
     exports: [RouterModule]
 })
 export class AppRoutingModule { }

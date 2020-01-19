@@ -4,31 +4,39 @@ import { Observable } from 'rxjs/Observable';
 import { environment } from './../environments/environment';
 /* todo: poprawić odbierane dane dla zaplecza */
 interface myData {
-    message: string,
-    success: boolean
+    LoggedIn: boolean,
+    Message: string,
+    Species: any
 }
 
 interface isLoggedIn {
     status: boolean
 }
+interface isPrivileged {
+    Speccies: boolean
+}
 
 interface logoutStatus {
     success: boolean
 }
+interface Message {
+    Message: boolean
+}
 @Injectable()
 export class UserService {
+
 
     constructor(private http: HttpClient) { }
 
     getSomeData() {
 
-        return this.http.get<myData>(environment.apiUrl + '/api/dashboard').subscribe(
-            data => console.log('success', data),
-            error => console.log('oops', error)
-        );
+        return this.http.get<myData>(environment.apiUrl + '/api/dashboard')
     }
 
-    isLoggedIn<isLoggedIn>(): Observable<isLoggedIn> {
+    isPrivileged(): Observable<isPrivileged> {
+        return this.http.get<isPrivileged>(environment.apiUrl + '/api/isprivileged')
+    }
+    isLoggedIn(): Observable<isLoggedIn> {
         return this.http.get<isLoggedIn>(environment.apiUrl + '/api/isloggedin')
     }
 
@@ -36,4 +44,12 @@ export class UserService {
         return this.http.get<logoutStatus>(environment.apiUrl + '/api/logout')
     }
 
+    register(nickname, species_id, planets_id, password) {
+        return this.http.post<Message>(environment.apiUrl + '/api/register/', {
+            nickname,
+            species_id,
+            planets_id,
+            password
+        })
+    }
 }

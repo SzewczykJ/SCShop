@@ -2,15 +2,17 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http'
 import { environment } from './../environments/environment';
 
-interface Info {
-    success: boolean,
-    message: string
+interface AuthorizeStatus {
+    LoggedIn: boolean,
+    Message: string,
+    Species: any
 }
 
 @Injectable()
 export class AuthService {
 
     private loggedInStatus = false
+    private Species: string;
 
     constructor(private http: HttpClient) { }
 
@@ -18,13 +20,27 @@ export class AuthService {
         this.loggedInStatus = value
     }
 
-    get isLoggedIn() {
+    setSpecies(value: string) {
+        this.Species = value
+    }
+
+    getSpecies() {
+        return this.Species
+    }
+    isPrivileged(): boolean {
+        if (environment.privilegedSpecies == this.Species) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+    isLoggedIn() {
         return this.loggedInStatus
     }
 
-    getUserDetails(nickname, password) {
-        // post these details to API server return user info if correct
-        return this.http.post<Info>(environment.apiUrl + '/api/auth', {
+    getAuthorize(nickname, password) {
+        // send user credentials to api to login
+        return this.http.post<AuthorizeStatus>(environment.apiUrl + '/api/auth', {
             nickname,
             password
         })
