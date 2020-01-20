@@ -132,22 +132,16 @@ app.get("/api/isLoggedIn/", (req, res) => {
     `select * from sessions where Customer_Id = '${req.query.customer_id}'`,
     function(err, rows, fields) {
       if (err) {
-        res
-          .status(500)
-          .send({
-            status: "false"
-          })
-          .json();
+        res.status(500).send({
+          status: "false"
+        });
         throw err;
       }
       if (rows.length > 0) {
         if (rows[0].Datestamp > new Date()) {
-          res
-            .status(200)
-            .send({
-              status: "true"
-            })
-            .json();
+          res.status(200).send({
+            status: "true"
+          });
         } else {
           connection.query(
             `delete from sessions where Customer_Id = '${req.query.customer_id}'`,
@@ -155,22 +149,16 @@ app.get("/api/isLoggedIn/", (req, res) => {
               if (deleteErr) {
                 res.sendStatus(500);
               }
-              res
-                .status(500)
-                .send({
-                  status: "false"
-                })
-                .json();
+              res.status(500).send({
+                status: "false"
+              });
             }
           );
         }
       } else {
-        res
-          .status(500)
-          .send({
-            status: "false"
-          })
-          .json();
+        res.status(500).send({
+          status: "false"
+        });
       }
     }
   );
@@ -183,12 +171,9 @@ app.post("/api/logout/", (req, res) => {
       if (err) {
         res.sendStatus(500);
       }
-      res
-        .status(200)
-        .send({
-          success: "true"
-        })
-        .json();
+      res.status(200).send({
+        success: "true"
+      });
     }
   );
 });
@@ -198,23 +183,17 @@ app.get("/api/dashboard/", (req, res) => {
     `select * from sessions where Customer_Id = '${req.query.customer_id}'`,
     function(err, rows, fields) {
       if (err) {
-        res
-          .status(500)
-          .send({
-            status: "false"
-          })
-          .json();
+        res.status(500).send({
+          status: "false"
+        });
         throw err;
       }
       console.log(rows[0]);
       if (rows.length > 0) {
         if (rows[0].Datestamp > new Date()) {
-          res
-            .status(200)
-            .send({
-              message: `${rows[0].Species_Id}`
-            })
-            .json();
+          res.status(200).send({
+            message: `${rows[0].Species_Id}`
+          });
         } else {
           connection.query(
             `delete from sessions where Customer_Id = '${req.query.customer_id}'`,
@@ -222,22 +201,16 @@ app.get("/api/dashboard/", (req, res) => {
               if (deleteErr) {
                 res.sendStatus(500);
               }
-              res
-                .status(500)
-                .send({
-                  status: "false"
-                })
-                .json();
+              res.status(500).send({
+                status: "false"
+              });
             }
           );
         }
       } else {
-        res
-          .status(500)
-          .send({
-            status: "false"
-          })
-          .json();
+        res.status(500).send({
+          status: "false"
+        });
       }
     }
   );
@@ -248,10 +221,7 @@ app.get("/api/species/all", (req, res) => {
     if (err) {
       res.sendStatus(500);
     }
-    res
-      .status(200)
-      .send(rows)
-      .json();
+    res.status(200).send(rows);
   });
 });
 
@@ -281,10 +251,7 @@ app.get("/api/planets/all", (req, res) => {
     if (err) {
       res.sendStatus(500);
     }
-    res
-      .status(200)
-      .send(rows)
-      .json();
+    res.status(200).send(rows);
   });
 });
 
