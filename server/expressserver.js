@@ -4,7 +4,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 const mysql = require("mysql");
-
+/*
 const connection = mysql.createConnection({
   host: "localhost",
   port: "3306",
@@ -12,20 +12,20 @@ const connection = mysql.createConnection({
   password: "root",
   database: "spaceshop"
 });
-
-// const connection = mysql.createConnection({
-//   host: "localhost",
-//   port: "3308",
-//   user: "user",
-//   password: "pass",
-//   database: "spaceshop"
-// });
+*/
+const connection = mysql.createConnection({
+  host: "localhost",
+  port: "3308",
+  user: "user",
+  password: "pass",
+  database: "spaceshop"
+});
 
 const Cryptr = require("cryptr");
 const cryptr = new Cryptr("secretSpaceships");
 
 app.get("/", (req, res) => {
-  connection.query("SELECT * from customers", function(err, rows, fields) {
+  connection.query("SELECT * from customers", function (err, rows, fields) {
     if (err) {
       res.sendStatus(500);
       throw err;
@@ -36,16 +36,21 @@ app.get("/", (req, res) => {
 });
 
 app.post("/api/register/", (req, res) => {
-  const { nickname, species_id, planets_id, password } = req.body;
+  const {
+    nickname,
+    password,
+    species_id,
+    planets_id
+  } = req.body;
   const cryptedPass = cryptr.encrypt(password);
   connection.query(
     `insert into customers (Nickname, Species_Id, Planets_Id, Password) values ('${nickname}', '${species_id}', '${planets_id}','${cryptedPass}')`,
-    function(err, rows, fields) {
+    function (err, rows, fields) {
       if (err) {
         res.sendStatus(500);
         throw err;
       }
-      res.sendStatus(200).send({
+      res.status(200).send({
         Message: true
       });
     }
@@ -53,11 +58,14 @@ app.post("/api/register/", (req, res) => {
 });
 
 app.post("/api/auth/", (req, res) => {
-  const { nickname, password } = req.body;
+  const {
+    nickname,
+    password
+  } = req.body;
 
   connection.query(
     `SELECT c.Id, c.Nickname, c.Species_Id, c.Planets_Id, c.Password, s.Name as Species_Name from customers c join species s on c.Species_Id = s.Id where c.Nickname = '${nickname}'`,
-    function(err, rows, fields) {
+    function (err, rows, fields) {
       if (err) {
         res.sendStatus(500);
         throw err;
@@ -73,7 +81,7 @@ app.post("/api/auth/", (req, res) => {
       if (cryptr.decrypt(rows[0].Password) == password) {
         connection.query(
           `SELECT * from sessions where customer_id = '${rows[0].Id}'`,
-          function(sessionErr, sessionRows, sessionFields) {
+          function (sessionErr, sessionRows, sessionFields) {
             if (sessionErr) {
               res.sendStatus(500);
               throw sessionErr;
@@ -81,14 +89,14 @@ app.post("/api/auth/", (req, res) => {
             if (sessionRows.length == 0) {
               const currentDate = new Date();
               const nextWeekDate = new Date(
-                currentDate.setDate(currentDate.getDate() + 7)
-              )
+                  currentDate.setDate(currentDate.getDate() + 7)
+                )
                 .toISOString()
                 .slice(0, 19)
                 .replace("T", " ");
               connection.query(
                 `INSERT into sessions (Customer_Id, Species_Id, Datestamp) values ('${rows[0].Id}', '${rows[0].Species_Id}', '${nextWeekDate}')`,
-                function(
+                function (
                   insertSessionErr,
                   insertSessionRows,
                   insertSessionFields
@@ -130,7 +138,7 @@ app.post("/api/auth/", (req, res) => {
 app.get("/api/isLoggedIn/", (req, res) => {
   connection.query(
     `select * from sessions where Customer_Id = '${req.query.customer_id}'`,
-    function(err, rows, fields) {
+    function (err, rows, fields) {
       if (err) {
         res.status(500).send({
           status: "false"
@@ -145,7 +153,7 @@ app.get("/api/isLoggedIn/", (req, res) => {
         } else {
           connection.query(
             `delete from sessions where Customer_Id = '${req.query.customer_id}'`,
-            function(deleteErr) {
+            function (deleteErr) {
               if (deleteErr) {
                 res.sendStatus(500);
               }
@@ -167,7 +175,7 @@ app.get("/api/isLoggedIn/", (req, res) => {
 app.post("/api/logout/", (req, res) => {
   connection.query(
     `delete from sessions where Customer_Id = '${req.body.Customer_Id}'`,
-    function(err) {
+    function (err) {
       if (err) {
         res.sendStatus(500);
       }
@@ -181,7 +189,7 @@ app.post("/api/logout/", (req, res) => {
 app.get("/api/dashboard/", (req, res) => {
   connection.query(
     `select * from sessions where Customer_Id = '${req.query.customer_id}'`,
-    function(err, rows, fields) {
+    function (err, rows, fields) {
       if (err) {
         res.status(500).send({
           status: "false"
@@ -197,7 +205,7 @@ app.get("/api/dashboard/", (req, res) => {
         } else {
           connection.query(
             `delete from sessions where Customer_Id = '${req.query.customer_id}'`,
-            function(deleteErr) {
+            function (deleteErr) {
               if (deleteErr) {
                 res.sendStatus(500);
               }
@@ -217,7 +225,7 @@ app.get("/api/dashboard/", (req, res) => {
 });
 
 app.get("/api/species/all", (req, res) => {
-  connection.query(`select * from species`, function(err, rows) {
+  connection.query(`select * from species`, function (err, rows) {
     if (err) {
       res.sendStatus(500);
     }
@@ -228,14 +236,14 @@ app.get("/api/species/all", (req, res) => {
 app.post("/api/species/add", (req, res) => {
   connection.query(
     `select * from species where Name = '${req.body.Species_Name}'`,
-    function(err, rows) {
+    function (err, rows) {
       if (err) {
         res.sendStatus(500);
       }
       if (rows[0] != undefined) {
         connection.query(
           `insert into species (Name) values ('${req.body.Species_Name}')`,
-          function(insertErr) {
+          function (insertErr) {
             if (insertErr) {
               res.sendStatus(500);
             }
@@ -247,7 +255,7 @@ app.post("/api/species/add", (req, res) => {
 });
 
 app.get("/api/planets/all", (req, res) => {
-  connection.query(`select * from planets`, function(err, rows) {
+  connection.query(`select * from planets`, function (err, rows) {
     if (err) {
       res.sendStatus(500);
     }
@@ -258,14 +266,14 @@ app.get("/api/planets/all", (req, res) => {
 app.post("/api/planets/add", (req, res) => {
   connection.query(
     `select * from planets where Name = '${req.body.Planet_Name}'`,
-    function(err, rows) {
+    function (err, rows) {
       if (err) {
         res.sendStatus(500);
       }
       if (rows[0] != undefined) {
         connection.query(
           `insert into planets (Name) values ('${req.body.Planet_Name}')`,
-          function(insertErr) {
+          function (insertErr) {
             if (insertErr) {
               res.sendStatus(500);
             }

@@ -35,17 +35,19 @@ export class RegisterComponent implements OnInit {
     constructor(private User: UserService,
         private router: Router,
         private http: HttpClient,
-        private formBuilder: FormBuilder) { }
-
-    ngOnInit() {
+        private formBuilder: FormBuilder) {
         this.form = this.formBuilder.group({
             nickname: ['', Validators.required],
             password: ['', Validators.required],
-            species_id: [],
-            planets_id: []
+            species_id: [''],
+            planets_id: ['']
         });
         this.getAllPlanets();
         this.getAllSpecies();
+    }
+
+    ngOnInit() {
+
     }
 
 
@@ -61,8 +63,8 @@ export class RegisterComponent implements OnInit {
             this.planets = data as Planets[];
         }, error => console.error(error))
     }
-
     submit() {
+        console.log(this.form.value);
         if (this.form.valid) {
             this.User.register(this.form.value).subscribe(data => {
                 if (data.Message === false) {
@@ -75,24 +77,5 @@ export class RegisterComponent implements OnInit {
             })
         }
     }
-    /*
-        register(event) {
-            event.preventDefault()
-            const target = event.target
-            const nickname = target.querySelector("#nick").value
-            const password = target.querySelector("#password").value
-            const species_id = target.querySelector("#password").value
-            const planets_id = target.querySelector("#password").value
-    
-            this.User.register(this.form.value nickname, species_id, planets_id, password).subscribe(data => {
-                if (data.Message === false) {
-                    window.alert("Error occured. Try again")
-                }
-                else {
-                    window.alert("Account created")
-                    this.router.navigate(['login'])
-                }
-            })
-        }
-        */
+
 }

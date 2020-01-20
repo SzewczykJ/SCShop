@@ -45,8 +45,6 @@ export class UserService {
     }
 
     register(value: any) {
-        return this.http.post<Message>(environment.apiUrl + '/api/register/', {
-            value
-        })
+        return this.http.post<Message>(environment.apiUrl + '/api/register/', value)
     }
 }

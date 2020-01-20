@@ -16,17 +16,17 @@
       </div>
     </div>
     <div class="form-group">
-      <label for="selectSpecies">Species</label>
-      <select id="selectSpecies" formControlName="species_id">
-        <option *ngFor="let type of species" [value]="type.id">
+      <label for="species_id">Species</label>
+      <select id="species_id" formControlName="species_id">
+        <option *ngFor="let type of species" [value]="type.Id">
           {{type.Name}}
         </option>
       </select>
     </div>
-    <div class="form-group">
-      <label for="selectPlanets">Planet</label>
-      <select id="selectPlanets" formControlName="planets_id">
-        <option *ngFor="let planet of planets" [value]="planet.id">
+    <div class=" form-group">
+      <label for="planets_id">Planet</label>
+      <select id="planets_id" formControlName="planets_id">
+        <option *ngFor="let planet of planets" [value]="planet.Id">
           {{planet.Name}}
         </option>
       </select>
