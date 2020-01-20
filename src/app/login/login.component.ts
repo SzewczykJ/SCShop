@@ -23,17 +23,17 @@ export class LoginComponent implements OnInit {
         const password = target.querySelector("#password").value
 
         this.Auth.getAuthorize(nick, password).subscribe(data => {
-            if (data.LoggedIn) {
+            if (data.LoggedIn == true) {
                 this.Auth.setLoggedIn(true)
                 this.Auth.setSpecies(data.Species);
 
                 if (data.Species === environment.privilegedSpecies) {
                     //redirect privileged species to the management panel
-
+                    this.router.navigate(['admin'])
                 } else {
                     //redirect to profile page
 
-                    this.router.navigate(['admin'])
+                    // this.router.navigate(['admin'])
                 }
             } else {
                 window.alert(data.Message)
