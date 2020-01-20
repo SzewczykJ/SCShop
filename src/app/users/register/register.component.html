@@ -1,29 +1,37 @@
-<form (submit)="register($event)">
-  <div class=" form-group">
-    <label for="username">Nickname</label>
-    <input ng-model="username" type="text" id="nick" class="form-control" placeholder="Enter nickname" autofocus="true"
-      autocomplete="off" required>
-  </div>
-  <div class="form-group">
-    <label for="exampleInputPassword1">Password</label>
-    <input type="password" class="form-control" id="exampleInputPassword1" placeholder="Password">
-  </div>
-  <div class="form-group">
-    <label for="exampleFormControlSelect1">Species</label>
-    <select [(ngModel)]="selectedValue">
-      <option *ngFor="let type of species" [value]="type.id">
-        {{type.Name}}
-      </option>
-    </select>
-  </div>
-  <div class="form-group">
-    <label for="exampleFormControlSelect1">Planet</label>
-    <select [(ngModel)]="selectedValue">
-      <option *ngFor="let planet of planets" [value]="planet.id">
-        {{planet.Name}}
-      </option>
-    </select>
-  </div>
+<div class="col-6">
+  <form [formGroup]="form" (ngSubmit)="submit()">
+    <div class=" form-group">
+      <label for="nickname">Nickname</label>
+      <input formControlName="nickname" id="nickname" type="text" class="form-control" placeholder="Enter nickname"
+        autofocus="true" autocomplete="off" required>
+      <div *ngIf="form.controls.nickname.errors?.required && form.controls.nickname.touched" class="error">
+        *Required
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="password">Password</label>
+      <input type="password" class="form-control" formControlName="password" id="password" placeholder=" Password">
+      <div *ngIf="form.controls.password.errors?.required && form.controls.password.touched" class="error">
+        *Required
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="selectSpecies">Species</label>
+      <select id="selectSpecies" formControlName="species_id">
+        <option *ngFor="let type of species" [value]="type.id">
+          {{type.Name}}
+        </option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="selectPlanets">Planet</label>
+      <select id="selectPlanets" formControlName="planets_id">
+        <option *ngFor="let planet of planets" [value]="planet.id">
+          {{planet.Name}}
+        </option>
+      </select>
+    </div>
 
-  <button type="submit" class="btn btn-primary">Create account</button>
-</form>
+    <button [disabled]="!form.valid" class="btn btn-primary">Create account</button>
+  </form>
+</div>

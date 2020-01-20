@@ -4,6 +4,8 @@ import { Router } from '@angular/router';
 import { SubjectSubscriber } from 'rxjs/internal/Subject';
 import { environment } from 'src/environments/environment';
 import { HttpClient } from '@angular/common/http'
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+
 
 interface Planets {
     Name: string,
@@ -26,25 +28,27 @@ interface Species {
 
 export class RegisterComponent implements OnInit {
 
+    form: FormGroup;
     planets: Planets[];
     species: Species[];
     selectedValue = null;
-    constructor(private User: UserService, private router: Router, private http: HttpClient) { }
+    constructor(private User: UserService,
+        private router: Router,
+        private http: HttpClient,
+        private formBuilder: FormBuilder) { }
 
     ngOnInit() {
-        this.planets = [{ Id: 1, Name: "United States" },
-        { Id: 2, Name: "Australia" },
-        { Id: 3, Name: "Canada" },
-        { Id: 4, Name: "Brazil" },
-        { Id: 5, Name: "England" }]
-        this.species = [{ Id: 1, Name: "United" },
-        { Id: 2, Name: "Aus" },
-        { Id: 3, Name: "Can" },
-        { Id: 4, Name: "Bra" },
-        { Id: 5, Name: "Eng" }]
-        // this.getAllPlanets();
-        //this.getAllSpecies();
+        this.form = this.formBuilder.group({
+            nickname: ['', Validators.required],
+            password: ['', Validators.required],
+            species_id: [],
+            planets_id: []
+        });
+        this.getAllPlanets();
+        this.getAllSpecies();
     }
+
+
 
     getAllSpecies() {
         this.http.get(environment.apiUrl + '/api/species/all').subscribe(data => {
@@ -58,22 +62,37 @@ export class RegisterComponent implements OnInit {
         }, error => console.error(error))
     }
 
-    register(event) {
-        event.preventDefault()
-        const target = event.target
-        const nickname = target.querySelector("#nick").value
-        const password = target.querySelector("#password").value
-        const species_id = target.querySelector("#password").value
-        const planets_id = target.querySelector("#password").value
-
-        this.User.register(nickname, species_id, planets_id, password).subscribe(data => {
-            if (data.Message === false) {
-                window.alert("Error occured. Try again")
-            }
-            else {
-                window.alert("Account created")
-                this.router.navigate(['login'])
-            }
-        })
+    submit() {
+        if (this.form.valid) {
+            this.User.register(this.form.value).subscribe(data => {
+                if (data.Message === false) {
+                    window.alert("Error occured. Try again")
+                }
+                else {
+                    window.alert("Account created")
+                    this.router.navigate(['login'])
+                }
+            })
+        }
     }
+    /*
+        register(event) {
+            event.preventDefault()
+            const target = event.target
+            const nickname = target.querySelector("#nick").value
+            const password = target.querySelector("#password").value
+            const species_id = target.querySelector("#password").value
+            const planets_id = target.querySelector("#password").value
+    
+            this.User.register(this.form.value nickname, species_id, planets_id, password).subscribe(data => {
+                if (data.Message === false) {
+                    window.alert("Error occured. Try again")
+                }
+                else {
+                    window.alert("Account created")
+                    this.router.navigate(['login'])
+                }
+            })
+        }
+        */
 }

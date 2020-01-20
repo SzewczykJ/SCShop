@@ -30,26 +30,23 @@ export class UserService {
 
     getSomeData() {
 
-        return this.http.get<myData>(environment.apiUrl + '/api/dashboard')
+        return this.http.get<myData>(environment.apiUrl + '/api/dashboard/')
     }
 
     isPrivileged(): Observable<isPrivileged> {
         return this.http.get<isPrivileged>(environment.apiUrl + '/api/isprivileged')
     }
     isLoggedIn(): Observable<isLoggedIn> {
-        return this.http.get<isLoggedIn>(environment.apiUrl + '/api/isloggedin')
+        return this.http.get<isLoggedIn>(environment.apiUrl + '/api/isloggedin/')
     }
 
     logout() {
-        return this.http.get<logoutStatus>(environment.apiUrl + '/api/logout')
+        return this.http.get<logoutStatus>(environment.apiUrl + '/api/logout/')
     }
 
-    register(nickname, species_id, planets_id, password) {
+    register(value: any) {
         return this.http.post<Message>(environment.apiUrl + '/api/register/', {
-            nickname,
-            species_id,
-            planets_id,
-            password
+            value
         })
     }
 }

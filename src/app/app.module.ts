@@ -14,7 +14,7 @@ import { LogoutComponent } from './logout/logout.component';
 import { UserService } from './user.service';
 import { OnlyWithPermissionGuardGuard } from './only-with-permission-guard.guard';
 import { RegisterComponent } from './users/register/register.component';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 @NgModule({
     declarations: [
@@ -28,6 +28,7 @@ import { FormsModule } from '@angular/forms';
     imports: [
         BrowserModule,
         FormsModule,
+        ReactiveFormsModule,
         AppRoutingModule,
         HttpClientModule,
         NgbModule
